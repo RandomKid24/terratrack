@@ -1,0 +1,7 @@
+{
+  "name": "TerraTrack",
+  "description": "Precision agriculture tool for land mapping and machinery path optimization.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
