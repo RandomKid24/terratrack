@@ -1,25 +1,48 @@
 import { GeoPoint, Point2D, PathSegment } from '../types';
+import * as turf from '@turf/turf';
 
-const EARTH_RADIUS = 6371000; // meters
+// --- Conversion Helpers ---
 
-/**
- * Converts a GeoPoint to a relative Cartesian point (meters) based on an origin.
- */
 export const geoToCartesian = (point: GeoPoint, origin: GeoPoint): Point2D => {
-  const dLat = (point.lat - origin.lat) * (Math.PI / 180);
-  const dLon = (point.lng - origin.lng) * (Math.PI / 180);
+  // Use Turf to calculate distance and bearing, then convert to XY
+  const from = turf.point([origin.lng, origin.lat]);
+  const to = turf.point([point.lng, point.lat]);
+  const distance = turf.distance(from, to, { units: 'meters' });
+  const bearing = turf.bearing(from, to);
   
-  // y is North (positive lat)
-  const y = dLat * EARTH_RADIUS;
+  // Convert polar to cartesian
+  // Turf bearing is -180 to 180, 0 is North. 
+  // Math.cos/sin take radians where 0 is East (usually). 
+  // Standard map projection: Y is North.
+  const rad = (90 - bearing) * (Math.PI / 180);
   
-  // x is East. Adjust for latitude shrinkage
-  const latRad = origin.lat * (Math.PI / 180);
-  const x = dLon * EARTH_RADIUS * Math.cos(latRad);
+  return {
+    x: distance * Math.cos(rad),
+    y: distance * Math.sin(rad)
+  };
+};
 
-  return { x, y };
+// Inverse of geoToCartesian (approximate for small areas)
+export const cartesianToGeo = (point: Point2D, origin: GeoPoint): GeoPoint => {
+  const dist = Math.sqrt(point.x * point.x + point.y * point.y);
+  if (dist === 0) return origin;
+  
+  const angleRad = Math.atan2(point.y, point.x);
+  const bearing = 90 - (angleRad * 180 / Math.PI);
+  
+  const originPt = turf.point([origin.lng, origin.lat]);
+  const dest = turf.destination(originPt, dist, bearing, { units: 'meters' });
+  
+  return {
+    lat: dest.geometry.coordinates[1],
+    lng: dest.geometry.coordinates[0],
+    timestamp: Date.now()
+  };
 };
 
 export const calculatePolygonArea = (points: Point2D[]): number => {
+  // Turf area expects GeoJSON, but for Cartesian points we can use simple shoelace
+  // or convert back to geo. For speed and relative accuracy in small fields, standard shoelace is fine.
   let area = 0;
   for (let i = 0; i < points.length; i++) {
     const j = (i + 1) % points.length;
@@ -40,9 +63,32 @@ export const calculatePerimeter = (points: Point2D[]): number => {
   return perimeter;
 };
 
-/**
- * Rotate a point around (0,0) by theta radians.
- */
+// --- Shape Rectification (Make Square) ---
+
+export const rectifyToRectangle = (points: GeoPoint[]): GeoPoint[] => {
+  if (points.length < 3) return points;
+
+  // 1. Convert to Cartesian
+  const origin = points[0];
+  const cartesian = points.map(p => geoToCartesian(p, origin));
+
+  // 2. Find bounding box of the shape (aligned to principal axes is hard, let's use standard bbox)
+  const polygon = turf.polygon([points.map(p => [p.lng, p.lat]).concat([[points[0].lng, points[0].lat]])]);
+  const bbox = turf.bbox(polygon); // [minX, minY, maxX, maxY]
+  
+  // 3. Create a rectangle from bbox
+  const rectPoly = turf.bboxPolygon(bbox);
+  
+  // 4. Return as GeoPoints
+  return rectPoly.geometry.coordinates[0].slice(0, 4).map(c => ({
+    lat: c[1],
+    lng: c[0],
+    timestamp: Date.now()
+  }));
+};
+
+// --- Path Generation ---
+
 const rotatePoint = (p: Point2D, theta: number): Point2D => {
   return {
     x: p.x * Math.cos(theta) - p.y * Math.sin(theta),
@@ -50,56 +96,63 @@ const rotatePoint = (p: Point2D, theta: number): Point2D => {
   };
 };
 
-/**
- * Generates an OPTIMIZED coverage path by trying multiple angles.
- * It rotates the field, generates a scanline, and measures efficiency.
- * Returns the path that requires the least travel distance (shortest path).
- */
 export const generateOptimizedPath = (
   points: Point2D[],
   width: number,
   bounds: { minX: number; maxX: number; minY: number; maxY: number }
 ): { segments: PathSegment[], angle: number } => {
   
+  // Safety check for width
+  const safeWidth = Math.max(width, 0.5);
+
   let bestSegments: PathSegment[] = [];
   let minTotalDist = Infinity;
   let bestAngle = 0;
 
-  // Try angles from 0 to 180 degrees in steps of 15 degrees
-  // This handles irregular shapes significantly better than fixed X/Y scanning
-  for (let angleDeg = 0; angleDeg < 180; angleDeg += 15) {
+  // Try standard angles: 0 (Horizontal), 90 (Vertical), and aligned to longest edge
+  const anglesToTest = [0, 90];
+  
+  // Add angle of longest edge
+  let maxDist = 0;
+  let longestEdgeAngle = 0;
+  for(let i=0; i<points.length; i++) {
+     const p1 = points[i];
+     const p2 = points[(i+1)%points.length];
+     const d = Math.sqrt(Math.pow(p2.x-p1.x, 2) + Math.pow(p2.y-p1.y, 2));
+     if(d > maxDist) {
+         maxDist = d;
+         longestEdgeAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * (180/Math.PI);
+     }
+  }
+  anglesToTest.push(longestEdgeAngle);
+
+  for (const angleDeg of anglesToTest) {
     const angleRad = angleDeg * (Math.PI / 180);
-    
-    // 1. Rotate polygon to this alignment
     const rotatedPoints = points.map(p => rotatePoint(p, angleRad));
     
-    // 2. Recalculate bounds for rotated polygon
-    let rMinX = Infinity, rMaxX = -Infinity, rMinY = Infinity, rMaxY = -Infinity;
+    // Bbox of rotated
+    let rMinY = Infinity, rMaxY = -Infinity;
     rotatedPoints.forEach(p => {
-      if (p.x < rMinX) rMinX = p.x;
-      if (p.x > rMaxX) rMaxX = p.x;
       if (p.y < rMinY) rMinY = p.y;
       if (p.y > rMaxY) rMaxY = p.y;
     });
 
-    // 3. Generate scanline path for this rotation
-    const scanSegments = generateScanLines(rotatedPoints, width, { minX: rMinX, maxX: rMaxX, minY: rMinY, maxY: rMaxY });
-
-    // 4. Calculate total distance (work + turns)
+    const segments = generateScanLines(rotatedPoints, safeWidth, rMinY, rMaxY);
+    
+    // Calc efficiency (total length)
     let dist = 0;
-    scanSegments.forEach(s => {
+    segments.forEach(s => {
        dist += Math.sqrt(Math.pow(s.p2.x - s.p1.x, 2) + Math.pow(s.p2.y - s.p1.y, 2));
     });
 
-    // 5. Check if this is better
-    if (dist < minTotalDist && scanSegments.length > 0) {
+    if (dist > 0 && dist < minTotalDist) {
       minTotalDist = dist;
-      bestSegments = scanSegments;
+      bestSegments = segments;
       bestAngle = angleRad;
     }
   }
 
-  // 6. Rotate the best segments back to original coordinates
+  // Rotate back
   const finalSegments = bestSegments.map(seg => ({
     type: seg.type,
     p1: rotatePoint(seg.p1, -bestAngle),
@@ -109,30 +162,30 @@ export const generateOptimizedPath = (
   return { segments: finalSegments, angle: bestAngle * (180 / Math.PI) };
 };
 
-/**
- * Internal basic scanline generator (Top-Down)
- */
 const generateScanLines = (
   points: Point2D[], 
   width: number, 
-  bounds: { minX: number; maxX: number; minY: number; maxY: number }
+  minY: number, 
+  maxY: number
 ): PathSegment[] => {
   const segments: PathSegment[] = [];
-  // Buffer ensures we don't graze the exact edge, effectively center-of-tool
   const buffer = width * 0.5; 
   
-  let currentY = bounds.maxY - buffer;
-  let direction = 1; // 1 = Left to Right, -1 = Right to Left
+  let currentY = maxY - buffer;
+  let direction = 1;
 
-  while (currentY > bounds.minY) {
+  // Robust loop guard
+  let iterations = 0;
+  while (currentY > minY && iterations < 1000) {
+    iterations++;
     const intersections: number[] = [];
 
     for (let i = 0; i < points.length; i++) {
       const p1 = points[i];
       const p2 = points[(i + 1) % points.length];
 
+      // Ray casting intersection
       if ((p1.y > currentY && p2.y <= currentY) || (p2.y > currentY && p1.y <= currentY)) {
-        // x = x1 + (y - y1) * (x2 - x1) / (y2 - y1)
         const x = p1.x + (currentY - p1.y) * (p2.x - p1.x) / (p2.y - p1.y);
         intersections.push(x);
       }
@@ -140,32 +193,30 @@ const generateScanLines = (
 
     intersections.sort((a, b) => a - b);
 
-    const lineSegments: PathSegment[] = [];
-    
-    // Create segments for valid intersections inside polygon
+    // Create segments inside the polygon
     for (let k = 0; k < intersections.length; k += 2) {
       if (k + 1 < intersections.length) {
-        const xStart = intersections[k];
-        const xEnd = intersections[k + 1];
+        const x1 = intersections[k];
+        const x2 = intersections[k + 1];
         
-        const p1 = { x: xStart, y: currentY };
-        const p2 = { x: xEnd, y: currentY };
+        if (Math.abs(x2 - x1) < 0.1) continue; // Skip tiny segments
+
+        const p1 = { x: x1, y: currentY };
+        const p2 = { x: x2, y: currentY };
         
+        // Add turn from previous
+        if (segments.length > 0) {
+            const prev = segments[segments.length - 1];
+            segments.push({ p1: prev.p2, p2: direction === 1 ? p1 : p2, type: 'turn' });
+        }
+
         if (direction === 1) {
-          lineSegments.push({ p1, p2, type: 'work' });
+          segments.push({ p1, p2, type: 'work' });
         } else {
-          lineSegments.unshift({ p1: p2, p2: p1, type: 'work' });
+          segments.push({ p1: p2, p2: p1, type: 'work' }); // Right to left
         }
       }
     }
-
-    if (segments.length > 0 && lineSegments.length > 0) {
-      const lastPoint = segments[segments.length - 1].p2;
-      const firstPoint = lineSegments[0].p1;
-      segments.push({ p1: lastPoint, p2: firstPoint, type: 'turn' });
-    }
-
-    lineSegments.forEach(seg => segments.push(seg));
 
     currentY -= width;
     direction *= -1;
@@ -174,34 +225,19 @@ const generateScanLines = (
   return segments;
 };
 
-export const simplifyPoints = (points: GeoPoint[], toleranceMeters: number = 2): GeoPoint[] => {
-  if (points.length < 3) return points;
-  
-  const result: GeoPoint[] = [points[0]];
-  let lastPoint = points[0];
+export const simplifyPoints = (points: GeoPoint[], tolerance: number): GeoPoint[] => {
+    // Simple distance filter
+    if(points.length < 3) return points;
+    const result = [points[0]];
+    let last = points[0];
+    const from = turf.point([last.lng, last.lat]);
 
-  for (let i = 1; i < points.length; i++) {
-    const current = points[i];
-    const dist = distanceMeters(lastPoint, current);
-    if (dist >= toleranceMeters) {
-      result.push(current);
-      lastPoint = current;
+    for(let i=1; i<points.length; i++) {
+        const to = turf.point([points[i].lng, points[i].lat]);
+        if(turf.distance(from, to, {units: 'meters'}) > tolerance) {
+            result.push(points[i]);
+            last = points[i];
+        }
     }
-  }
-  return result;
-}
-
-const distanceMeters = (p1: GeoPoint, p2: GeoPoint): number => {
-  const R = 6371e3; 
-  const φ1 = p1.lat * Math.PI/180;
-  const φ2 = p2.lat * Math.PI/180;
-  const Δφ = (p2.lat-p1.lat) * Math.PI/180;
-  const Δλ = (p2.lng-p1.lng) * Math.PI/180;
-
-  const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-            Math.cos(φ1) * Math.cos(φ2) *
-            Math.sin(Δλ/2) * Math.sin(Δλ/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-
-  return R * c;
+    return result;
 }

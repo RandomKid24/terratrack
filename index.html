@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>TerraTrack</title>
     <meta name="theme-color" content="#ffffff" />
-    <!-- Inline Manifest for PWA support -->
-    <link rel="manifest" href="data:application/manifest+json;base64,eyJzaG9ydF9uYW1lIjoiVGVycmFUcmFjayIsIm5hbWUiOiJUZXJyYVRyYWNrIiwiaWNvbnMiOlt7InNyYyI6Imh0dHBzOi8vY2RuLmpzZGVsaXZyLm5ldC/Z2gvZm9ydHdhc29tZS9mb250LWF3ZXNvbWUtZnJlZS9zdmdzL3NvbGlkL3RyYWN0b3Iuc3ZnIiwic2l6ZXMiOiIxOTJ4MTkyIiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifV0sInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsInRoZW1lX2NvbG9yIjoiI2ZmZmZmZiIsImJhY2tncm91bmRfY29sb3IiOiIjZmZmZmZmIn0=" />
+    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       /* Prevent pull-to-refresh on mobile */
@@ -18,16 +17,19 @@
         height: 100dvh;
       }
     </style>
-  <script type="importmap">
+<script type="importmap">
 {
   "imports": {
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
     "@google/genai": "https://esm.sh/@google/genai@^1.33.0",
-    "lucide-react": "https://esm.sh/lucide-react@^0.561.0",
+    "vite": "https://esm.sh/vite@^7.3.0",
     "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
-    "vite": "https://esm.sh/vite@^7.3.0"
+    "vite-plugin-pwa": "https://esm.sh/vite-plugin-pwa@^1.2.0",
+    "@turf/turf": "https://esm.sh/@turf/turf@^7.3.1",
+    "dexie": "https://esm.sh/dexie@^4.2.1",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.561.0"
   }
 }
 </script>
