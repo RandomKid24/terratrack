@@ -1,0 +1,46 @@
+name: flutter_app
+description: "A new Flutter project."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  
+  # State Management
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+  
+  # Database
+  isar: ^3.1.0+1
+  isar_flutter_libs: ^3.1.0+1
+  path_provider: ^2.1.2
+  
+  # AI
+  google_generative_ai: ^0.4.0
+  
+  # Location & Maps
+  geolocator: ^11.0.0
+  permission_handler: ^11.3.0
+  
+  # Utils
+  vector_math: ^2.1.4
+  uuid: ^4.3.3
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  
+  # Code Generation
+  build_runner: ^2.4.8
+  riverpod_generator: ^2.4.0
+  isar_generator: ^3.1.0+1
+
+flutter:
+  uses-material-design: true
