@@ -15,6 +15,15 @@ class AppModeController extends _$AppModeController {
 }
 
 @riverpod
+class IsSurveying extends _$IsSurveying {
+  @override
+  bool build() => false;
+
+  void start() => state = true;
+  void stop() => state = false;
+}
+
+@riverpod
 class GeoPointsController extends _$GeoPointsController {
   @override
   List<GeoPoint> build() => [];
@@ -71,8 +80,32 @@ class PlanController extends _$PlanController {
 }
 
 @riverpod
-Stream<Position> gpsStream(GpsStreamRef ref) {
-  return Geolocator.getPositionStream(
+Stream<Position> gpsStream(GpsStreamRef ref) async* {
+  bool serviceEnabled;
+  LocationPermission permission;
+
+  // Test if location services are enabled.
+  serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    throw Exception('Location services are disabled. Please enable GPS.');
+  }
+
+  permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      throw Exception('Location permissions are denied');
+    }
+  }
+  
+  if (permission == LocationPermission.deniedForever) {
+    throw Exception(
+      'Location permissions are permanently denied, we cannot request permissions.');
+  } 
+
+  // When we reach here, permissions are granted and we can
+  // continue accessing the position of the device.
+  yield* Geolocator.getPositionStream(
     locationSettings: const LocationSettings(
       accuracy: LocationAccuracy.high,
       distanceFilter: 0,

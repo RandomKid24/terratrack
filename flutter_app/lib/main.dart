@@ -6,9 +6,7 @@ import 'ui/main_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Database
-  final db = DatabaseService();
-  await db.db; // Wait for DB to open
+  // Database will be initialized lazily when first accessed
 
   runApp(
     const ProviderScope(

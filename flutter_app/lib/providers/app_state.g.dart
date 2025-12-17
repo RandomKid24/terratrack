@@ -6,7 +6,7 @@ part of 'app_state.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$gpsStreamHash() => r'44f172e215a81b82af5e3aaac945fbe3f6997512';
+String _$gpsStreamHash() => r'02ff788be3950a53ca0ed70e2e06ae80aa5bc84f';
 
 /// See also [gpsStream].
 @ProviderFor(gpsStream)
@@ -36,6 +36,21 @@ final appModeControllerProvider =
 );
 
 typedef _$AppModeController = AutoDisposeNotifier<AppMode>;
+String _$isSurveyingHash() => r'33cff91a59ef8aa6aa85a7fe21606a72bbe0aac6';
+
+/// See also [IsSurveying].
+@ProviderFor(IsSurveying)
+final isSurveyingProvider =
+    AutoDisposeNotifierProvider<IsSurveying, bool>.internal(
+  IsSurveying.new,
+  name: r'isSurveyingProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$isSurveyingHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef _$IsSurveying = AutoDisposeNotifier<bool>;
 String _$geoPointsControllerHash() =>
     r'4c44b29a38cd7f427f732da6e75964f886e9e92d';
 

@@ -21,6 +21,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     final field = ref.watch(fieldControllerProvider);
     final plan = ref.watch(planControllerProvider);
     final equipment = ref.watch(equipmentControllerProvider);
+    final isSurveying = ref.watch(isSurveyingProvider);
 
     return Scaffold(
       body: Stack(
@@ -43,8 +44,50 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                   ),
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, stack) => Center(child: Text('GPS Error: $err')),
+              loading: () => const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Acquiring GPS Signal...', style: TextStyle(color: Colors.grey)),
+                  ],
+                ),
+              ),
+              error: (err, stack) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.location_off, size: 48, color: Colors.red),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Location Error',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          err.toString(),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.grey),
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton(
+                          onPressed: () async {
+                            // Retry by invalidating the provider
+                            ref.invalidate(gpsStreamProvider);
+                            // Also try to request permission again
+                            await Geolocator.requestPermission();
+                          },
+                          child: const Text('Retry Permission / GPS'),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           ),
 
@@ -109,7 +152,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 ],
               ),
               child: SafeArea(
-                child: _buildControls(mode, geoPoints, field, equipment),
+                child: _buildControls(mode, geoPoints, field, equipment, isSurveying),
               ),
             ),
           ),
@@ -127,19 +170,19 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     }
   }
 
-  Widget _buildControls(AppMode mode, List<GeoPoint> points, FieldPolygon? field, Equipment equipment) {
+  Widget _buildControls(AppMode mode, List<GeoPoint> points, FieldPolygon? field, Equipment equipment, bool isSurveying) {
     switch (mode) {
       case AppMode.CAPTURE:
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (points.isEmpty)
+            if (!isSurveying)
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   onPressed: () {
-                    // Start logic is implicit as we are streaming, but we can clear points
                     ref.read(geoPointsControllerProvider.notifier).clear();
+                    ref.read(isSurveyingProvider.notifier).start();
                   },
                   icon: const Icon(Icons.play_arrow),
                   label: const Text('Start Survey'),
@@ -208,6 +251,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                     child: OutlinedButton.icon(
                       onPressed: () {
                          ref.read(geoPointsControllerProvider.notifier).clear();
+                         ref.read(isSurveyingProvider.notifier).stop();
                       },
                       icon: const Icon(Icons.close),
                       label: const Text('Cancel'),

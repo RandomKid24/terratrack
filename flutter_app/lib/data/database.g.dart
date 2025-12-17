@@ -2,2192 +2,942 @@
 
 part of 'database.dart';
 
-// **************************************************************************
-// IsarCollectionGenerator
-// **************************************************************************
-
-// coverage:ignore-file
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
-
-extension GetFieldCollection on Isar {
-  IsarCollection<Field> get fields => this.collection();
-}
-
-const FieldSchema = CollectionSchema(
-  name: r'Field',
-  id: 256898425088394984,
-  properties: {
-    r'area': PropertySchema(
-      id: 0,
-      name: r'area',
-      type: IsarType.double,
-    ),
-    r'created': PropertySchema(
-      id: 1,
-      name: r'created',
-      type: IsarType.dateTime,
-    ),
-    r'name': PropertySchema(
-      id: 2,
-      name: r'name',
-      type: IsarType.string,
-    ),
-    r'perimeter': PropertySchema(
-      id: 3,
-      name: r'perimeter',
-      type: IsarType.double,
-    ),
-    r'points': PropertySchema(
-      id: 4,
-      name: r'points',
-      type: IsarType.objectList,
-      target: r'EmbeddedGeoPoint',
-    )
-  },
-  estimateSize: _fieldEstimateSize,
-  serialize: _fieldSerialize,
-  deserialize: _fieldDeserialize,
-  deserializeProp: _fieldDeserializeProp,
-  idName: r'id',
-  indexes: {},
-  links: {},
-  embeddedSchemas: {r'EmbeddedGeoPoint': EmbeddedGeoPointSchema},
-  getId: _fieldGetId,
-  getLinks: _fieldGetLinks,
-  attach: _fieldAttach,
-  version: '3.1.0+1',
-);
-
-int _fieldEstimateSize(
-  Field object,
-  List<int> offsets,
-  Map<Type, List<int>> allOffsets,
-) {
-  var bytesCount = offsets.last;
-  {
-    final value = object.name;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
+// ignore_for_file: type=lint
+class $FieldsTable extends Fields with TableInfo<$FieldsTable, Field> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $FieldsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _areaMeta = const VerificationMeta('area');
+  @override
+  late final GeneratedColumn<double> area = GeneratedColumn<double>(
+      'area', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _perimeterMeta =
+      const VerificationMeta('perimeter');
+  @override
+  late final GeneratedColumn<double> perimeter = GeneratedColumn<double>(
+      'perimeter', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _createdMeta =
+      const VerificationMeta('created');
+  @override
+  late final GeneratedColumn<DateTime> created = GeneratedColumn<DateTime>(
+      'created', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _pointsJsonMeta =
+      const VerificationMeta('pointsJson');
+  @override
+  late final GeneratedColumn<String> pointsJson = GeneratedColumn<String>(
+      'points_json', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, name, area, perimeter, created, pointsJson];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'fields';
+  @override
+  VerificationContext validateIntegrity(Insertable<Field> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
-  }
-  {
-    final list = object.points;
-    if (list != null) {
-      bytesCount += 3 + list.length * 3;
-      {
-        final offsets = allOffsets[EmbeddedGeoPoint]!;
-        for (var i = 0; i < list.length; i++) {
-          final value = list[i];
-          bytesCount +=
-              EmbeddedGeoPointSchema.estimateSize(value, offsets, allOffsets);
-        }
-      }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
     }
-  }
-  return bytesCount;
-}
-
-void _fieldSerialize(
-  Field object,
-  IsarWriter writer,
-  List<int> offsets,
-  Map<Type, List<int>> allOffsets,
-) {
-  writer.writeDouble(offsets[0], object.area);
-  writer.writeDateTime(offsets[1], object.created);
-  writer.writeString(offsets[2], object.name);
-  writer.writeDouble(offsets[3], object.perimeter);
-  writer.writeObjectList<EmbeddedGeoPoint>(
-    offsets[4],
-    allOffsets,
-    EmbeddedGeoPointSchema.serialize,
-    object.points,
-  );
-}
-
-Field _fieldDeserialize(
-  Id id,
-  IsarReader reader,
-  List<int> offsets,
-  Map<Type, List<int>> allOffsets,
-) {
-  final object = Field();
-  object.area = reader.readDoubleOrNull(offsets[0]);
-  object.created = reader.readDateTimeOrNull(offsets[1]);
-  object.id = id;
-  object.name = reader.readStringOrNull(offsets[2]);
-  object.perimeter = reader.readDoubleOrNull(offsets[3]);
-  object.points = reader.readObjectList<EmbeddedGeoPoint>(
-    offsets[4],
-    EmbeddedGeoPointSchema.deserialize,
-    allOffsets,
-    EmbeddedGeoPoint(),
-  );
-  return object;
-}
-
-P _fieldDeserializeProp<P>(
-  IsarReader reader,
-  int propertyId,
-  int offset,
-  Map<Type, List<int>> allOffsets,
-) {
-  switch (propertyId) {
-    case 0:
-      return (reader.readDoubleOrNull(offset)) as P;
-    case 1:
-      return (reader.readDateTimeOrNull(offset)) as P;
-    case 2:
-      return (reader.readStringOrNull(offset)) as P;
-    case 3:
-      return (reader.readDoubleOrNull(offset)) as P;
-    case 4:
-      return (reader.readObjectList<EmbeddedGeoPoint>(
-        offset,
-        EmbeddedGeoPointSchema.deserialize,
-        allOffsets,
-        EmbeddedGeoPoint(),
-      )) as P;
-    default:
-      throw IsarError('Unknown property with id $propertyId');
-  }
-}
-
-Id _fieldGetId(Field object) {
-  return object.id;
-}
-
-List<IsarLinkBase<dynamic>> _fieldGetLinks(Field object) {
-  return [];
-}
-
-void _fieldAttach(IsarCollection<dynamic> col, Id id, Field object) {
-  object.id = id;
-}
-
-extension FieldQueryWhereSort on QueryBuilder<Field, Field, QWhere> {
-  QueryBuilder<Field, Field, QAfterWhere> anyId() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(const IdWhereClause.any());
-    });
-  }
-}
-
-extension FieldQueryWhere on QueryBuilder<Field, Field, QWhereClause> {
-  QueryBuilder<Field, Field, QAfterWhereClause> idEqualTo(Id id) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: id,
-        upper: id,
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterWhereClause> idNotEqualTo(Id id) {
-    return QueryBuilder.apply(this, (query) {
-      if (query.whereSort == Sort.asc) {
-        return query
-            .addWhereClause(
-              IdWhereClause.lessThan(upper: id, includeUpper: false),
-            )
-            .addWhereClause(
-              IdWhereClause.greaterThan(lower: id, includeLower: false),
-            );
-      } else {
-        return query
-            .addWhereClause(
-              IdWhereClause.greaterThan(lower: id, includeLower: false),
-            )
-            .addWhereClause(
-              IdWhereClause.lessThan(upper: id, includeUpper: false),
-            );
-      }
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterWhereClause> idGreaterThan(Id id,
-      {bool include = false}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(
-        IdWhereClause.greaterThan(lower: id, includeLower: include),
-      );
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterWhereClause> idLessThan(Id id,
-      {bool include = false}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(
-        IdWhereClause.lessThan(upper: id, includeUpper: include),
-      );
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterWhereClause> idBetween(
-    Id lowerId,
-    Id upperId, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: lowerId,
-        includeLower: includeLower,
-        upper: upperId,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-}
-
-extension FieldQueryFilter on QueryBuilder<Field, Field, QFilterCondition> {
-  QueryBuilder<Field, Field, QAfterFilterCondition> areaIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'area',
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> areaIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'area',
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> areaEqualTo(
-    double? value, {
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'area',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> areaGreaterThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'area',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> areaLessThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'area',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> areaBetween(
-    double? lower,
-    double? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'area',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> createdIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'created',
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> createdIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'created',
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> createdEqualTo(
-      DateTime? value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'created',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> createdGreaterThan(
-    DateTime? value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'created',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> createdLessThan(
-    DateTime? value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'created',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> createdBetween(
-    DateTime? lower,
-    DateTime? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'created',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> idEqualTo(Id value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'id',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> idGreaterThan(
-    Id value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> idLessThan(
-    Id value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> idBetween(
-    Id lower,
-    Id upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'id',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> nameIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'name',
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> nameIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'name',
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> nameEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> nameGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> nameLessThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> nameBetween(
-    String? lower,
-    String? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'name',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> nameStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> nameEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> nameContains(String value,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'name',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> nameMatches(String pattern,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'name',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> nameIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'name',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> nameIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'name',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> perimeterIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'perimeter',
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> perimeterIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'perimeter',
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> perimeterEqualTo(
-    double? value, {
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'perimeter',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> perimeterGreaterThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'perimeter',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> perimeterLessThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'perimeter',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> perimeterBetween(
-    double? lower,
-    double? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'perimeter',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> pointsIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'points',
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> pointsIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'points',
-      ));
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> pointsLengthEqualTo(
-      int length) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'points',
-        length,
-        true,
-        length,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> pointsIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'points',
-        0,
-        true,
-        0,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> pointsIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'points',
-        0,
-        false,
-        999999,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> pointsLengthLessThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'points',
-        0,
-        true,
-        length,
-        include,
-      );
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> pointsLengthGreaterThan(
-    int length, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'points',
-        length,
-        include,
-        999999,
-        true,
-      );
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterFilterCondition> pointsLengthBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.listLength(
-        r'points',
-        lower,
-        includeLower,
-        upper,
-        includeUpper,
-      );
-    });
-  }
-}
-
-extension FieldQueryObject on QueryBuilder<Field, Field, QFilterCondition> {
-  QueryBuilder<Field, Field, QAfterFilterCondition> pointsElement(
-      FilterQuery<EmbeddedGeoPoint> q) {
-    return QueryBuilder.apply(this, (query) {
-      return query.object(q, r'points');
-    });
-  }
-}
-
-extension FieldQueryLinks on QueryBuilder<Field, Field, QFilterCondition> {}
-
-extension FieldQuerySortBy on QueryBuilder<Field, Field, QSortBy> {
-  QueryBuilder<Field, Field, QAfterSortBy> sortByArea() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'area', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterSortBy> sortByAreaDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'area', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterSortBy> sortByCreated() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'created', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterSortBy> sortByCreatedDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'created', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterSortBy> sortByName() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'name', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterSortBy> sortByNameDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'name', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterSortBy> sortByPerimeter() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'perimeter', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterSortBy> sortByPerimeterDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'perimeter', Sort.desc);
-    });
-  }
-}
-
-extension FieldQuerySortThenBy on QueryBuilder<Field, Field, QSortThenBy> {
-  QueryBuilder<Field, Field, QAfterSortBy> thenByArea() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'area', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterSortBy> thenByAreaDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'area', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterSortBy> thenByCreated() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'created', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterSortBy> thenByCreatedDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'created', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterSortBy> thenById() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'id', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterSortBy> thenByIdDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'id', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterSortBy> thenByName() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'name', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterSortBy> thenByNameDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'name', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterSortBy> thenByPerimeter() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'perimeter', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Field, Field, QAfterSortBy> thenByPerimeterDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'perimeter', Sort.desc);
-    });
-  }
-}
-
-extension FieldQueryWhereDistinct on QueryBuilder<Field, Field, QDistinct> {
-  QueryBuilder<Field, Field, QDistinct> distinctByArea() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'area');
-    });
-  }
-
-  QueryBuilder<Field, Field, QDistinct> distinctByCreated() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'created');
-    });
-  }
-
-  QueryBuilder<Field, Field, QDistinct> distinctByName(
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'name', caseSensitive: caseSensitive);
-    });
-  }
-
-  QueryBuilder<Field, Field, QDistinct> distinctByPerimeter() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'perimeter');
-    });
-  }
-}
-
-extension FieldQueryProperty on QueryBuilder<Field, Field, QQueryProperty> {
-  QueryBuilder<Field, int, QQueryOperations> idProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'id');
-    });
-  }
-
-  QueryBuilder<Field, double?, QQueryOperations> areaProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'area');
-    });
-  }
-
-  QueryBuilder<Field, DateTime?, QQueryOperations> createdProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'created');
-    });
-  }
-
-  QueryBuilder<Field, String?, QQueryOperations> nameProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'name');
-    });
-  }
-
-  QueryBuilder<Field, double?, QQueryOperations> perimeterProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'perimeter');
-    });
-  }
-
-  QueryBuilder<Field, List<EmbeddedGeoPoint>?, QQueryOperations>
-      pointsProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'points');
-    });
-  }
-}
-
-// coverage:ignore-file
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
-
-extension GetSettingsCollection on Isar {
-  IsarCollection<Settings> get settings => this.collection();
-}
-
-const SettingsSchema = CollectionSchema(
-  name: r'Settings',
-  id: -8656046621518759136,
-  properties: {
-    r'equipmentName': PropertySchema(
-      id: 0,
-      name: r'equipmentName',
-      type: IsarType.string,
-    ),
-    r'equipmentSpeed': PropertySchema(
-      id: 1,
-      name: r'equipmentSpeed',
-      type: IsarType.double,
-    ),
-    r'equipmentType': PropertySchema(
-      id: 2,
-      name: r'equipmentType',
-      type: IsarType.string,
-    ),
-    r'equipmentWidth': PropertySchema(
-      id: 3,
-      name: r'equipmentWidth',
-      type: IsarType.double,
-    )
-  },
-  estimateSize: _settingsEstimateSize,
-  serialize: _settingsSerialize,
-  deserialize: _settingsDeserialize,
-  deserializeProp: _settingsDeserializeProp,
-  idName: r'id',
-  indexes: {},
-  links: {},
-  embeddedSchemas: {},
-  getId: _settingsGetId,
-  getLinks: _settingsGetLinks,
-  attach: _settingsAttach,
-  version: '3.1.0+1',
-);
-
-int _settingsEstimateSize(
-  Settings object,
-  List<int> offsets,
-  Map<Type, List<int>> allOffsets,
-) {
-  var bytesCount = offsets.last;
-  {
-    final value = object.equipmentName;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
+    if (data.containsKey('area')) {
+      context.handle(
+          _areaMeta, area.isAcceptableOrUnknown(data['area']!, _areaMeta));
     }
-  }
-  {
-    final value = object.equipmentType;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
+    if (data.containsKey('perimeter')) {
+      context.handle(_perimeterMeta,
+          perimeter.isAcceptableOrUnknown(data['perimeter']!, _perimeterMeta));
     }
+    if (data.containsKey('created')) {
+      context.handle(_createdMeta,
+          created.isAcceptableOrUnknown(data['created']!, _createdMeta));
+    }
+    if (data.containsKey('points_json')) {
+      context.handle(
+          _pointsJsonMeta,
+          pointsJson.isAcceptableOrUnknown(
+              data['points_json']!, _pointsJsonMeta));
+    }
+    return context;
   }
-  return bytesCount;
-}
 
-void _settingsSerialize(
-  Settings object,
-  IsarWriter writer,
-  List<int> offsets,
-  Map<Type, List<int>> allOffsets,
-) {
-  writer.writeString(offsets[0], object.equipmentName);
-  writer.writeDouble(offsets[1], object.equipmentSpeed);
-  writer.writeString(offsets[2], object.equipmentType);
-  writer.writeDouble(offsets[3], object.equipmentWidth);
-}
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Field map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Field(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name']),
+      area: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}area']),
+      perimeter: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}perimeter']),
+      created: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created']),
+      pointsJson: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}points_json']),
+    );
+  }
 
-Settings _settingsDeserialize(
-  Id id,
-  IsarReader reader,
-  List<int> offsets,
-  Map<Type, List<int>> allOffsets,
-) {
-  final object = Settings();
-  object.equipmentName = reader.readStringOrNull(offsets[0]);
-  object.equipmentSpeed = reader.readDoubleOrNull(offsets[1]);
-  object.equipmentType = reader.readStringOrNull(offsets[2]);
-  object.equipmentWidth = reader.readDoubleOrNull(offsets[3]);
-  object.id = id;
-  return object;
-}
-
-P _settingsDeserializeProp<P>(
-  IsarReader reader,
-  int propertyId,
-  int offset,
-  Map<Type, List<int>> allOffsets,
-) {
-  switch (propertyId) {
-    case 0:
-      return (reader.readStringOrNull(offset)) as P;
-    case 1:
-      return (reader.readDoubleOrNull(offset)) as P;
-    case 2:
-      return (reader.readStringOrNull(offset)) as P;
-    case 3:
-      return (reader.readDoubleOrNull(offset)) as P;
-    default:
-      throw IsarError('Unknown property with id $propertyId');
+  @override
+  $FieldsTable createAlias(String alias) {
+    return $FieldsTable(attachedDatabase, alias);
   }
 }
 
-Id _settingsGetId(Settings object) {
-  return object.id;
-}
-
-List<IsarLinkBase<dynamic>> _settingsGetLinks(Settings object) {
-  return [];
-}
-
-void _settingsAttach(IsarCollection<dynamic> col, Id id, Settings object) {
-  object.id = id;
-}
-
-extension SettingsQueryWhereSort on QueryBuilder<Settings, Settings, QWhere> {
-  QueryBuilder<Settings, Settings, QAfterWhere> anyId() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(const IdWhereClause.any());
-    });
-  }
-}
-
-extension SettingsQueryWhere on QueryBuilder<Settings, Settings, QWhereClause> {
-  QueryBuilder<Settings, Settings, QAfterWhereClause> idEqualTo(Id id) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: id,
-        upper: id,
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterWhereClause> idNotEqualTo(Id id) {
-    return QueryBuilder.apply(this, (query) {
-      if (query.whereSort == Sort.asc) {
-        return query
-            .addWhereClause(
-              IdWhereClause.lessThan(upper: id, includeUpper: false),
-            )
-            .addWhereClause(
-              IdWhereClause.greaterThan(lower: id, includeLower: false),
-            );
-      } else {
-        return query
-            .addWhereClause(
-              IdWhereClause.greaterThan(lower: id, includeLower: false),
-            )
-            .addWhereClause(
-              IdWhereClause.lessThan(upper: id, includeUpper: false),
-            );
-      }
-    });
+class Field extends DataClass implements Insertable<Field> {
+  final int id;
+  final String? name;
+  final double? area;
+  final double? perimeter;
+  final DateTime? created;
+  final String? pointsJson;
+  const Field(
+      {required this.id,
+      this.name,
+      this.area,
+      this.perimeter,
+      this.created,
+      this.pointsJson});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    if (!nullToAbsent || name != null) {
+      map['name'] = Variable<String>(name);
+    }
+    if (!nullToAbsent || area != null) {
+      map['area'] = Variable<double>(area);
+    }
+    if (!nullToAbsent || perimeter != null) {
+      map['perimeter'] = Variable<double>(perimeter);
+    }
+    if (!nullToAbsent || created != null) {
+      map['created'] = Variable<DateTime>(created);
+    }
+    if (!nullToAbsent || pointsJson != null) {
+      map['points_json'] = Variable<String>(pointsJson);
+    }
+    return map;
   }
 
-  QueryBuilder<Settings, Settings, QAfterWhereClause> idGreaterThan(Id id,
-      {bool include = false}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(
-        IdWhereClause.greaterThan(lower: id, includeLower: include),
+  FieldsCompanion toCompanion(bool nullToAbsent) {
+    return FieldsCompanion(
+      id: Value(id),
+      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
+      area: area == null && nullToAbsent ? const Value.absent() : Value(area),
+      perimeter: perimeter == null && nullToAbsent
+          ? const Value.absent()
+          : Value(perimeter),
+      created: created == null && nullToAbsent
+          ? const Value.absent()
+          : Value(created),
+      pointsJson: pointsJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pointsJson),
+    );
+  }
+
+  factory Field.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Field(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String?>(json['name']),
+      area: serializer.fromJson<double?>(json['area']),
+      perimeter: serializer.fromJson<double?>(json['perimeter']),
+      created: serializer.fromJson<DateTime?>(json['created']),
+      pointsJson: serializer.fromJson<String?>(json['pointsJson']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String?>(name),
+      'area': serializer.toJson<double?>(area),
+      'perimeter': serializer.toJson<double?>(perimeter),
+      'created': serializer.toJson<DateTime?>(created),
+      'pointsJson': serializer.toJson<String?>(pointsJson),
+    };
+  }
+
+  Field copyWith(
+          {int? id,
+          Value<String?> name = const Value.absent(),
+          Value<double?> area = const Value.absent(),
+          Value<double?> perimeter = const Value.absent(),
+          Value<DateTime?> created = const Value.absent(),
+          Value<String?> pointsJson = const Value.absent()}) =>
+      Field(
+        id: id ?? this.id,
+        name: name.present ? name.value : this.name,
+        area: area.present ? area.value : this.area,
+        perimeter: perimeter.present ? perimeter.value : this.perimeter,
+        created: created.present ? created.value : this.created,
+        pointsJson: pointsJson.present ? pointsJson.value : this.pointsJson,
       );
+  @override
+  String toString() {
+    return (StringBuffer('Field(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('area: $area, ')
+          ..write('perimeter: $perimeter, ')
+          ..write('created: $created, ')
+          ..write('pointsJson: $pointsJson')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, name, area, perimeter, created, pointsJson);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Field &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.area == this.area &&
+          other.perimeter == this.perimeter &&
+          other.created == this.created &&
+          other.pointsJson == this.pointsJson);
+}
+
+class FieldsCompanion extends UpdateCompanion<Field> {
+  final Value<int> id;
+  final Value<String?> name;
+  final Value<double?> area;
+  final Value<double?> perimeter;
+  final Value<DateTime?> created;
+  final Value<String?> pointsJson;
+  const FieldsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.area = const Value.absent(),
+    this.perimeter = const Value.absent(),
+    this.created = const Value.absent(),
+    this.pointsJson = const Value.absent(),
+  });
+  FieldsCompanion.insert({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.area = const Value.absent(),
+    this.perimeter = const Value.absent(),
+    this.created = const Value.absent(),
+    this.pointsJson = const Value.absent(),
+  });
+  static Insertable<Field> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<double>? area,
+    Expression<double>? perimeter,
+    Expression<DateTime>? created,
+    Expression<String>? pointsJson,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (area != null) 'area': area,
+      if (perimeter != null) 'perimeter': perimeter,
+      if (created != null) 'created': created,
+      if (pointsJson != null) 'points_json': pointsJson,
     });
   }
 
-  QueryBuilder<Settings, Settings, QAfterWhereClause> idLessThan(Id id,
-      {bool include = false}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(
-        IdWhereClause.lessThan(upper: id, includeUpper: include),
+  FieldsCompanion copyWith(
+      {Value<int>? id,
+      Value<String?>? name,
+      Value<double?>? area,
+      Value<double?>? perimeter,
+      Value<DateTime?>? created,
+      Value<String?>? pointsJson}) {
+    return FieldsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      area: area ?? this.area,
+      perimeter: perimeter ?? this.perimeter,
+      created: created ?? this.created,
+      pointsJson: pointsJson ?? this.pointsJson,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (area.present) {
+      map['area'] = Variable<double>(area.value);
+    }
+    if (perimeter.present) {
+      map['perimeter'] = Variable<double>(perimeter.value);
+    }
+    if (created.present) {
+      map['created'] = Variable<DateTime>(created.value);
+    }
+    if (pointsJson.present) {
+      map['points_json'] = Variable<String>(pointsJson.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FieldsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('area: $area, ')
+          ..write('perimeter: $perimeter, ')
+          ..write('created: $created, ')
+          ..write('pointsJson: $pointsJson')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SettingsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _equipmentNameMeta =
+      const VerificationMeta('equipmentName');
+  @override
+  late final GeneratedColumn<String> equipmentName = GeneratedColumn<String>(
+      'equipment_name', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _equipmentWidthMeta =
+      const VerificationMeta('equipmentWidth');
+  @override
+  late final GeneratedColumn<double> equipmentWidth = GeneratedColumn<double>(
+      'equipment_width', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _equipmentSpeedMeta =
+      const VerificationMeta('equipmentSpeed');
+  @override
+  late final GeneratedColumn<double> equipmentSpeed = GeneratedColumn<double>(
+      'equipment_speed', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _equipmentTypeMeta =
+      const VerificationMeta('equipmentType');
+  @override
+  late final GeneratedColumn<String> equipmentType = GeneratedColumn<String>(
+      'equipment_type', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, equipmentName, equipmentWidth, equipmentSpeed, equipmentType];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'settings';
+  @override
+  VerificationContext validateIntegrity(Insertable<Setting> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('equipment_name')) {
+      context.handle(
+          _equipmentNameMeta,
+          equipmentName.isAcceptableOrUnknown(
+              data['equipment_name']!, _equipmentNameMeta));
+    }
+    if (data.containsKey('equipment_width')) {
+      context.handle(
+          _equipmentWidthMeta,
+          equipmentWidth.isAcceptableOrUnknown(
+              data['equipment_width']!, _equipmentWidthMeta));
+    }
+    if (data.containsKey('equipment_speed')) {
+      context.handle(
+          _equipmentSpeedMeta,
+          equipmentSpeed.isAcceptableOrUnknown(
+              data['equipment_speed']!, _equipmentSpeedMeta));
+    }
+    if (data.containsKey('equipment_type')) {
+      context.handle(
+          _equipmentTypeMeta,
+          equipmentType.isAcceptableOrUnknown(
+              data['equipment_type']!, _equipmentTypeMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Setting map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Setting(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      equipmentName: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}equipment_name']),
+      equipmentWidth: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}equipment_width']),
+      equipmentSpeed: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}equipment_speed']),
+      equipmentType: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}equipment_type']),
+    );
+  }
+
+  @override
+  $SettingsTable createAlias(String alias) {
+    return $SettingsTable(attachedDatabase, alias);
+  }
+}
+
+class Setting extends DataClass implements Insertable<Setting> {
+  final int id;
+  final String? equipmentName;
+  final double? equipmentWidth;
+  final double? equipmentSpeed;
+  final String? equipmentType;
+  const Setting(
+      {required this.id,
+      this.equipmentName,
+      this.equipmentWidth,
+      this.equipmentSpeed,
+      this.equipmentType});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    if (!nullToAbsent || equipmentName != null) {
+      map['equipment_name'] = Variable<String>(equipmentName);
+    }
+    if (!nullToAbsent || equipmentWidth != null) {
+      map['equipment_width'] = Variable<double>(equipmentWidth);
+    }
+    if (!nullToAbsent || equipmentSpeed != null) {
+      map['equipment_speed'] = Variable<double>(equipmentSpeed);
+    }
+    if (!nullToAbsent || equipmentType != null) {
+      map['equipment_type'] = Variable<String>(equipmentType);
+    }
+    return map;
+  }
+
+  SettingsCompanion toCompanion(bool nullToAbsent) {
+    return SettingsCompanion(
+      id: Value(id),
+      equipmentName: equipmentName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(equipmentName),
+      equipmentWidth: equipmentWidth == null && nullToAbsent
+          ? const Value.absent()
+          : Value(equipmentWidth),
+      equipmentSpeed: equipmentSpeed == null && nullToAbsent
+          ? const Value.absent()
+          : Value(equipmentSpeed),
+      equipmentType: equipmentType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(equipmentType),
+    );
+  }
+
+  factory Setting.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Setting(
+      id: serializer.fromJson<int>(json['id']),
+      equipmentName: serializer.fromJson<String?>(json['equipmentName']),
+      equipmentWidth: serializer.fromJson<double?>(json['equipmentWidth']),
+      equipmentSpeed: serializer.fromJson<double?>(json['equipmentSpeed']),
+      equipmentType: serializer.fromJson<String?>(json['equipmentType']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'equipmentName': serializer.toJson<String?>(equipmentName),
+      'equipmentWidth': serializer.toJson<double?>(equipmentWidth),
+      'equipmentSpeed': serializer.toJson<double?>(equipmentSpeed),
+      'equipmentType': serializer.toJson<String?>(equipmentType),
+    };
+  }
+
+  Setting copyWith(
+          {int? id,
+          Value<String?> equipmentName = const Value.absent(),
+          Value<double?> equipmentWidth = const Value.absent(),
+          Value<double?> equipmentSpeed = const Value.absent(),
+          Value<String?> equipmentType = const Value.absent()}) =>
+      Setting(
+        id: id ?? this.id,
+        equipmentName:
+            equipmentName.present ? equipmentName.value : this.equipmentName,
+        equipmentWidth:
+            equipmentWidth.present ? equipmentWidth.value : this.equipmentWidth,
+        equipmentSpeed:
+            equipmentSpeed.present ? equipmentSpeed.value : this.equipmentSpeed,
+        equipmentType:
+            equipmentType.present ? equipmentType.value : this.equipmentType,
       );
+  @override
+  String toString() {
+    return (StringBuffer('Setting(')
+          ..write('id: $id, ')
+          ..write('equipmentName: $equipmentName, ')
+          ..write('equipmentWidth: $equipmentWidth, ')
+          ..write('equipmentSpeed: $equipmentSpeed, ')
+          ..write('equipmentType: $equipmentType')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id, equipmentName, equipmentWidth, equipmentSpeed, equipmentType);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Setting &&
+          other.id == this.id &&
+          other.equipmentName == this.equipmentName &&
+          other.equipmentWidth == this.equipmentWidth &&
+          other.equipmentSpeed == this.equipmentSpeed &&
+          other.equipmentType == this.equipmentType);
+}
+
+class SettingsCompanion extends UpdateCompanion<Setting> {
+  final Value<int> id;
+  final Value<String?> equipmentName;
+  final Value<double?> equipmentWidth;
+  final Value<double?> equipmentSpeed;
+  final Value<String?> equipmentType;
+  const SettingsCompanion({
+    this.id = const Value.absent(),
+    this.equipmentName = const Value.absent(),
+    this.equipmentWidth = const Value.absent(),
+    this.equipmentSpeed = const Value.absent(),
+    this.equipmentType = const Value.absent(),
+  });
+  SettingsCompanion.insert({
+    this.id = const Value.absent(),
+    this.equipmentName = const Value.absent(),
+    this.equipmentWidth = const Value.absent(),
+    this.equipmentSpeed = const Value.absent(),
+    this.equipmentType = const Value.absent(),
+  });
+  static Insertable<Setting> custom({
+    Expression<int>? id,
+    Expression<String>? equipmentName,
+    Expression<double>? equipmentWidth,
+    Expression<double>? equipmentSpeed,
+    Expression<String>? equipmentType,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (equipmentName != null) 'equipment_name': equipmentName,
+      if (equipmentWidth != null) 'equipment_width': equipmentWidth,
+      if (equipmentSpeed != null) 'equipment_speed': equipmentSpeed,
+      if (equipmentType != null) 'equipment_type': equipmentType,
     });
   }
 
-  QueryBuilder<Settings, Settings, QAfterWhereClause> idBetween(
-    Id lowerId,
-    Id upperId, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: lowerId,
-        includeLower: includeLower,
-        upper: upperId,
-        includeUpper: includeUpper,
-      ));
-    });
+  SettingsCompanion copyWith(
+      {Value<int>? id,
+      Value<String?>? equipmentName,
+      Value<double?>? equipmentWidth,
+      Value<double?>? equipmentSpeed,
+      Value<String?>? equipmentType}) {
+    return SettingsCompanion(
+      id: id ?? this.id,
+      equipmentName: equipmentName ?? this.equipmentName,
+      equipmentWidth: equipmentWidth ?? this.equipmentWidth,
+      equipmentSpeed: equipmentSpeed ?? this.equipmentSpeed,
+      equipmentType: equipmentType ?? this.equipmentType,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (equipmentName.present) {
+      map['equipment_name'] = Variable<String>(equipmentName.value);
+    }
+    if (equipmentWidth.present) {
+      map['equipment_width'] = Variable<double>(equipmentWidth.value);
+    }
+    if (equipmentSpeed.present) {
+      map['equipment_speed'] = Variable<double>(equipmentSpeed.value);
+    }
+    if (equipmentType.present) {
+      map['equipment_type'] = Variable<String>(equipmentType.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SettingsCompanion(')
+          ..write('id: $id, ')
+          ..write('equipmentName: $equipmentName, ')
+          ..write('equipmentWidth: $equipmentWidth, ')
+          ..write('equipmentSpeed: $equipmentSpeed, ')
+          ..write('equipmentType: $equipmentType')
+          ..write(')'))
+        .toString();
   }
 }
 
-extension SettingsQueryFilter
-    on QueryBuilder<Settings, Settings, QFilterCondition> {
-  QueryBuilder<Settings, Settings, QAfterFilterCondition>
-      equipmentNameIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'equipmentName',
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition>
-      equipmentNameIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'equipmentName',
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition> equipmentNameEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'equipmentName',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition>
-      equipmentNameGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'equipmentName',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition> equipmentNameLessThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'equipmentName',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition> equipmentNameBetween(
-    String? lower,
-    String? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'equipmentName',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition>
-      equipmentNameStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'equipmentName',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition> equipmentNameEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'equipmentName',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition> equipmentNameContains(
-      String value,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'equipmentName',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition> equipmentNameMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'equipmentName',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition>
-      equipmentNameIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'equipmentName',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition>
-      equipmentNameIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'equipmentName',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition>
-      equipmentSpeedIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'equipmentSpeed',
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition>
-      equipmentSpeedIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'equipmentSpeed',
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition> equipmentSpeedEqualTo(
-    double? value, {
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'equipmentSpeed',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition>
-      equipmentSpeedGreaterThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'equipmentSpeed',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition>
-      equipmentSpeedLessThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'equipmentSpeed',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition> equipmentSpeedBetween(
-    double? lower,
-    double? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'equipmentSpeed',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition>
-      equipmentTypeIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'equipmentType',
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition>
-      equipmentTypeIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'equipmentType',
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition> equipmentTypeEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'equipmentType',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition>
-      equipmentTypeGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'equipmentType',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition> equipmentTypeLessThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'equipmentType',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition> equipmentTypeBetween(
-    String? lower,
-    String? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'equipmentType',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition>
-      equipmentTypeStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'equipmentType',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition> equipmentTypeEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'equipmentType',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition> equipmentTypeContains(
-      String value,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'equipmentType',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition> equipmentTypeMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'equipmentType',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition>
-      equipmentTypeIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'equipmentType',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition>
-      equipmentTypeIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'equipmentType',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition>
-      equipmentWidthIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'equipmentWidth',
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition>
-      equipmentWidthIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'equipmentWidth',
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition> equipmentWidthEqualTo(
-    double? value, {
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'equipmentWidth',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition>
-      equipmentWidthGreaterThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'equipmentWidth',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition>
-      equipmentWidthLessThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'equipmentWidth',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition> equipmentWidthBetween(
-    double? lower,
-    double? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'equipmentWidth',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition> idEqualTo(Id value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'id',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition> idGreaterThan(
-    Id value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition> idLessThan(
-    Id value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterFilterCondition> idBetween(
-    Id lower,
-    Id upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'id',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
+abstract class _$AppDatabase extends GeneratedDatabase {
+  _$AppDatabase(QueryExecutor e) : super(e);
+  _$AppDatabaseManager get managers => _$AppDatabaseManager(this);
+  late final $FieldsTable fields = $FieldsTable(this);
+  late final $SettingsTable settings = $SettingsTable(this);
+  @override
+  Iterable<TableInfo<Table, Object?>> get allTables =>
+      allSchemaEntities.whereType<TableInfo<Table, Object?>>();
+  @override
+  List<DatabaseSchemaEntity> get allSchemaEntities => [fields, settings];
 }
 
-extension SettingsQueryObject
-    on QueryBuilder<Settings, Settings, QFilterCondition> {}
+typedef $$FieldsTableInsertCompanionBuilder = FieldsCompanion Function({
+  Value<int> id,
+  Value<String?> name,
+  Value<double?> area,
+  Value<double?> perimeter,
+  Value<DateTime?> created,
+  Value<String?> pointsJson,
+});
+typedef $$FieldsTableUpdateCompanionBuilder = FieldsCompanion Function({
+  Value<int> id,
+  Value<String?> name,
+  Value<double?> area,
+  Value<double?> perimeter,
+  Value<DateTime?> created,
+  Value<String?> pointsJson,
+});
 
-extension SettingsQueryLinks
-    on QueryBuilder<Settings, Settings, QFilterCondition> {}
-
-extension SettingsQuerySortBy on QueryBuilder<Settings, Settings, QSortBy> {
-  QueryBuilder<Settings, Settings, QAfterSortBy> sortByEquipmentName() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'equipmentName', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterSortBy> sortByEquipmentNameDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'equipmentName', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterSortBy> sortByEquipmentSpeed() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'equipmentSpeed', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterSortBy> sortByEquipmentSpeedDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'equipmentSpeed', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterSortBy> sortByEquipmentType() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'equipmentType', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterSortBy> sortByEquipmentTypeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'equipmentType', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterSortBy> sortByEquipmentWidth() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'equipmentWidth', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterSortBy> sortByEquipmentWidthDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'equipmentWidth', Sort.desc);
-    });
-  }
+class $$FieldsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $FieldsTable,
+    Field,
+    $$FieldsTableFilterComposer,
+    $$FieldsTableOrderingComposer,
+    $$FieldsTableProcessedTableManager,
+    $$FieldsTableInsertCompanionBuilder,
+    $$FieldsTableUpdateCompanionBuilder> {
+  $$FieldsTableTableManager(_$AppDatabase db, $FieldsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer:
+              $$FieldsTableFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $$FieldsTableOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) => $$FieldsTableProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<int> id = const Value.absent(),
+            Value<String?> name = const Value.absent(),
+            Value<double?> area = const Value.absent(),
+            Value<double?> perimeter = const Value.absent(),
+            Value<DateTime?> created = const Value.absent(),
+            Value<String?> pointsJson = const Value.absent(),
+          }) =>
+              FieldsCompanion(
+            id: id,
+            name: name,
+            area: area,
+            perimeter: perimeter,
+            created: created,
+            pointsJson: pointsJson,
+          ),
+          getInsertCompanionBuilder: ({
+            Value<int> id = const Value.absent(),
+            Value<String?> name = const Value.absent(),
+            Value<double?> area = const Value.absent(),
+            Value<double?> perimeter = const Value.absent(),
+            Value<DateTime?> created = const Value.absent(),
+            Value<String?> pointsJson = const Value.absent(),
+          }) =>
+              FieldsCompanion.insert(
+            id: id,
+            name: name,
+            area: area,
+            perimeter: perimeter,
+            created: created,
+            pointsJson: pointsJson,
+          ),
+        ));
 }
 
-extension SettingsQuerySortThenBy
-    on QueryBuilder<Settings, Settings, QSortThenBy> {
-  QueryBuilder<Settings, Settings, QAfterSortBy> thenByEquipmentName() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'equipmentName', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterSortBy> thenByEquipmentNameDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'equipmentName', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterSortBy> thenByEquipmentSpeed() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'equipmentSpeed', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterSortBy> thenByEquipmentSpeedDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'equipmentSpeed', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterSortBy> thenByEquipmentType() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'equipmentType', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterSortBy> thenByEquipmentTypeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'equipmentType', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterSortBy> thenByEquipmentWidth() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'equipmentWidth', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterSortBy> thenByEquipmentWidthDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'equipmentWidth', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterSortBy> thenById() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'id', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Settings, Settings, QAfterSortBy> thenByIdDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'id', Sort.desc);
-    });
-  }
+class $$FieldsTableProcessedTableManager extends ProcessedTableManager<
+    _$AppDatabase,
+    $FieldsTable,
+    Field,
+    $$FieldsTableFilterComposer,
+    $$FieldsTableOrderingComposer,
+    $$FieldsTableProcessedTableManager,
+    $$FieldsTableInsertCompanionBuilder,
+    $$FieldsTableUpdateCompanionBuilder> {
+  $$FieldsTableProcessedTableManager(super.$state);
 }
 
-extension SettingsQueryWhereDistinct
-    on QueryBuilder<Settings, Settings, QDistinct> {
-  QueryBuilder<Settings, Settings, QDistinct> distinctByEquipmentName(
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'equipmentName',
-          caseSensitive: caseSensitive);
-    });
-  }
+class $$FieldsTableFilterComposer
+    extends FilterComposer<_$AppDatabase, $FieldsTable> {
+  $$FieldsTableFilterComposer(super.$state);
+  ColumnFilters<int> get id => $state.composableBuilder(
+      column: $state.table.id,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
 
-  QueryBuilder<Settings, Settings, QDistinct> distinctByEquipmentSpeed() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'equipmentSpeed');
-    });
-  }
+  ColumnFilters<String> get name => $state.composableBuilder(
+      column: $state.table.name,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
 
-  QueryBuilder<Settings, Settings, QDistinct> distinctByEquipmentType(
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'equipmentType',
-          caseSensitive: caseSensitive);
-    });
-  }
+  ColumnFilters<double> get area => $state.composableBuilder(
+      column: $state.table.area,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
 
-  QueryBuilder<Settings, Settings, QDistinct> distinctByEquipmentWidth() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'equipmentWidth');
-    });
-  }
+  ColumnFilters<double> get perimeter => $state.composableBuilder(
+      column: $state.table.perimeter,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<DateTime> get created => $state.composableBuilder(
+      column: $state.table.created,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get pointsJson => $state.composableBuilder(
+      column: $state.table.pointsJson,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
 }
 
-extension SettingsQueryProperty
-    on QueryBuilder<Settings, Settings, QQueryProperty> {
-  QueryBuilder<Settings, int, QQueryOperations> idProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'id');
-    });
-  }
+class $$FieldsTableOrderingComposer
+    extends OrderingComposer<_$AppDatabase, $FieldsTable> {
+  $$FieldsTableOrderingComposer(super.$state);
+  ColumnOrderings<int> get id => $state.composableBuilder(
+      column: $state.table.id,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
 
-  QueryBuilder<Settings, String?, QQueryOperations> equipmentNameProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'equipmentName');
-    });
-  }
+  ColumnOrderings<String> get name => $state.composableBuilder(
+      column: $state.table.name,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
 
-  QueryBuilder<Settings, double?, QQueryOperations> equipmentSpeedProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'equipmentSpeed');
-    });
-  }
+  ColumnOrderings<double> get area => $state.composableBuilder(
+      column: $state.table.area,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
 
-  QueryBuilder<Settings, String?, QQueryOperations> equipmentTypeProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'equipmentType');
-    });
-  }
+  ColumnOrderings<double> get perimeter => $state.composableBuilder(
+      column: $state.table.perimeter,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
 
-  QueryBuilder<Settings, double?, QQueryOperations> equipmentWidthProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'equipmentWidth');
-    });
-  }
+  ColumnOrderings<DateTime> get created => $state.composableBuilder(
+      column: $state.table.created,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get pointsJson => $state.composableBuilder(
+      column: $state.table.pointsJson,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-// **************************************************************************
-// IsarEmbeddedGenerator
-// **************************************************************************
+typedef $$SettingsTableInsertCompanionBuilder = SettingsCompanion Function({
+  Value<int> id,
+  Value<String?> equipmentName,
+  Value<double?> equipmentWidth,
+  Value<double?> equipmentSpeed,
+  Value<String?> equipmentType,
+});
+typedef $$SettingsTableUpdateCompanionBuilder = SettingsCompanion Function({
+  Value<int> id,
+  Value<String?> equipmentName,
+  Value<double?> equipmentWidth,
+  Value<double?> equipmentSpeed,
+  Value<String?> equipmentType,
+});
 
-// coverage:ignore-file
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
-
-const EmbeddedGeoPointSchema = Schema(
-  name: r'EmbeddedGeoPoint',
-  id: 8817100140460892430,
-  properties: {
-    r'lat': PropertySchema(
-      id: 0,
-      name: r'lat',
-      type: IsarType.double,
-    ),
-    r'lng': PropertySchema(
-      id: 1,
-      name: r'lng',
-      type: IsarType.double,
-    ),
-    r'timestamp': PropertySchema(
-      id: 2,
-      name: r'timestamp',
-      type: IsarType.long,
-    )
-  },
-  estimateSize: _embeddedGeoPointEstimateSize,
-  serialize: _embeddedGeoPointSerialize,
-  deserialize: _embeddedGeoPointDeserialize,
-  deserializeProp: _embeddedGeoPointDeserializeProp,
-);
-
-int _embeddedGeoPointEstimateSize(
-  EmbeddedGeoPoint object,
-  List<int> offsets,
-  Map<Type, List<int>> allOffsets,
-) {
-  var bytesCount = offsets.last;
-  return bytesCount;
+class $$SettingsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $SettingsTable,
+    Setting,
+    $$SettingsTableFilterComposer,
+    $$SettingsTableOrderingComposer,
+    $$SettingsTableProcessedTableManager,
+    $$SettingsTableInsertCompanionBuilder,
+    $$SettingsTableUpdateCompanionBuilder> {
+  $$SettingsTableTableManager(_$AppDatabase db, $SettingsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer:
+              $$SettingsTableFilterComposer(ComposerState(db, table)),
+          orderingComposer:
+              $$SettingsTableOrderingComposer(ComposerState(db, table)),
+          getChildManagerBuilder: (p) =>
+              $$SettingsTableProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<int> id = const Value.absent(),
+            Value<String?> equipmentName = const Value.absent(),
+            Value<double?> equipmentWidth = const Value.absent(),
+            Value<double?> equipmentSpeed = const Value.absent(),
+            Value<String?> equipmentType = const Value.absent(),
+          }) =>
+              SettingsCompanion(
+            id: id,
+            equipmentName: equipmentName,
+            equipmentWidth: equipmentWidth,
+            equipmentSpeed: equipmentSpeed,
+            equipmentType: equipmentType,
+          ),
+          getInsertCompanionBuilder: ({
+            Value<int> id = const Value.absent(),
+            Value<String?> equipmentName = const Value.absent(),
+            Value<double?> equipmentWidth = const Value.absent(),
+            Value<double?> equipmentSpeed = const Value.absent(),
+            Value<String?> equipmentType = const Value.absent(),
+          }) =>
+              SettingsCompanion.insert(
+            id: id,
+            equipmentName: equipmentName,
+            equipmentWidth: equipmentWidth,
+            equipmentSpeed: equipmentSpeed,
+            equipmentType: equipmentType,
+          ),
+        ));
 }
 
-void _embeddedGeoPointSerialize(
-  EmbeddedGeoPoint object,
-  IsarWriter writer,
-  List<int> offsets,
-  Map<Type, List<int>> allOffsets,
-) {
-  writer.writeDouble(offsets[0], object.lat);
-  writer.writeDouble(offsets[1], object.lng);
-  writer.writeLong(offsets[2], object.timestamp);
+class $$SettingsTableProcessedTableManager extends ProcessedTableManager<
+    _$AppDatabase,
+    $SettingsTable,
+    Setting,
+    $$SettingsTableFilterComposer,
+    $$SettingsTableOrderingComposer,
+    $$SettingsTableProcessedTableManager,
+    $$SettingsTableInsertCompanionBuilder,
+    $$SettingsTableUpdateCompanionBuilder> {
+  $$SettingsTableProcessedTableManager(super.$state);
 }
 
-EmbeddedGeoPoint _embeddedGeoPointDeserialize(
-  Id id,
-  IsarReader reader,
-  List<int> offsets,
-  Map<Type, List<int>> allOffsets,
-) {
-  final object = EmbeddedGeoPoint(
-    lat: reader.readDoubleOrNull(offsets[0]),
-    lng: reader.readDoubleOrNull(offsets[1]),
-    timestamp: reader.readLongOrNull(offsets[2]),
-  );
-  return object;
+class $$SettingsTableFilterComposer
+    extends FilterComposer<_$AppDatabase, $SettingsTable> {
+  $$SettingsTableFilterComposer(super.$state);
+  ColumnFilters<int> get id => $state.composableBuilder(
+      column: $state.table.id,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get equipmentName => $state.composableBuilder(
+      column: $state.table.equipmentName,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<double> get equipmentWidth => $state.composableBuilder(
+      column: $state.table.equipmentWidth,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<double> get equipmentSpeed => $state.composableBuilder(
+      column: $state.table.equipmentSpeed,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get equipmentType => $state.composableBuilder(
+      column: $state.table.equipmentType,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
 }
 
-P _embeddedGeoPointDeserializeProp<P>(
-  IsarReader reader,
-  int propertyId,
-  int offset,
-  Map<Type, List<int>> allOffsets,
-) {
-  switch (propertyId) {
-    case 0:
-      return (reader.readDoubleOrNull(offset)) as P;
-    case 1:
-      return (reader.readDoubleOrNull(offset)) as P;
-    case 2:
-      return (reader.readLongOrNull(offset)) as P;
-    default:
-      throw IsarError('Unknown property with id $propertyId');
-  }
+class $$SettingsTableOrderingComposer
+    extends OrderingComposer<_$AppDatabase, $SettingsTable> {
+  $$SettingsTableOrderingComposer(super.$state);
+  ColumnOrderings<int> get id => $state.composableBuilder(
+      column: $state.table.id,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get equipmentName => $state.composableBuilder(
+      column: $state.table.equipmentName,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<double> get equipmentWidth => $state.composableBuilder(
+      column: $state.table.equipmentWidth,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<double> get equipmentSpeed => $state.composableBuilder(
+      column: $state.table.equipmentSpeed,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get equipmentType => $state.composableBuilder(
+      column: $state.table.equipmentType,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
 }
 
-extension EmbeddedGeoPointQueryFilter
-    on QueryBuilder<EmbeddedGeoPoint, EmbeddedGeoPoint, QFilterCondition> {
-  QueryBuilder<EmbeddedGeoPoint, EmbeddedGeoPoint, QAfterFilterCondition>
-      latIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'lat',
-      ));
-    });
-  }
-
-  QueryBuilder<EmbeddedGeoPoint, EmbeddedGeoPoint, QAfterFilterCondition>
-      latIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'lat',
-      ));
-    });
-  }
-
-  QueryBuilder<EmbeddedGeoPoint, EmbeddedGeoPoint, QAfterFilterCondition>
-      latEqualTo(
-    double? value, {
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'lat',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<EmbeddedGeoPoint, EmbeddedGeoPoint, QAfterFilterCondition>
-      latGreaterThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'lat',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<EmbeddedGeoPoint, EmbeddedGeoPoint, QAfterFilterCondition>
-      latLessThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'lat',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<EmbeddedGeoPoint, EmbeddedGeoPoint, QAfterFilterCondition>
-      latBetween(
-    double? lower,
-    double? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'lat',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<EmbeddedGeoPoint, EmbeddedGeoPoint, QAfterFilterCondition>
-      lngIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'lng',
-      ));
-    });
-  }
-
-  QueryBuilder<EmbeddedGeoPoint, EmbeddedGeoPoint, QAfterFilterCondition>
-      lngIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'lng',
-      ));
-    });
-  }
-
-  QueryBuilder<EmbeddedGeoPoint, EmbeddedGeoPoint, QAfterFilterCondition>
-      lngEqualTo(
-    double? value, {
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'lng',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<EmbeddedGeoPoint, EmbeddedGeoPoint, QAfterFilterCondition>
-      lngGreaterThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'lng',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<EmbeddedGeoPoint, EmbeddedGeoPoint, QAfterFilterCondition>
-      lngLessThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'lng',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<EmbeddedGeoPoint, EmbeddedGeoPoint, QAfterFilterCondition>
-      lngBetween(
-    double? lower,
-    double? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'lng',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<EmbeddedGeoPoint, EmbeddedGeoPoint, QAfterFilterCondition>
-      timestampIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'timestamp',
-      ));
-    });
-  }
-
-  QueryBuilder<EmbeddedGeoPoint, EmbeddedGeoPoint, QAfterFilterCondition>
-      timestampIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'timestamp',
-      ));
-    });
-  }
-
-  QueryBuilder<EmbeddedGeoPoint, EmbeddedGeoPoint, QAfterFilterCondition>
-      timestampEqualTo(int? value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'timestamp',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<EmbeddedGeoPoint, EmbeddedGeoPoint, QAfterFilterCondition>
-      timestampGreaterThan(
-    int? value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'timestamp',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<EmbeddedGeoPoint, EmbeddedGeoPoint, QAfterFilterCondition>
-      timestampLessThan(
-    int? value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'timestamp',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<EmbeddedGeoPoint, EmbeddedGeoPoint, QAfterFilterCondition>
-      timestampBetween(
-    int? lower,
-    int? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'timestamp',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
+class _$AppDatabaseManager {
+  final _$AppDatabase _db;
+  _$AppDatabaseManager(this._db);
+  $$FieldsTableTableManager get fields =>
+      $$FieldsTableTableManager(_db, _db.fields);
+  $$SettingsTableTableManager get settings =>
+      $$SettingsTableTableManager(_db, _db.settings);
 }
-
-extension EmbeddedGeoPointQueryObject
-    on QueryBuilder<EmbeddedGeoPoint, EmbeddedGeoPoint, QFilterCondition> {}

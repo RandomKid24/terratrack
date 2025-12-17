@@ -1,93 +1,89 @@
-import 'package:isar/isar.dart';
+import 'package:drift/drift.dart';
+import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
+import 'dart:io';
 import '../core/geo_utils.dart';
 
 part 'database.g.dart';
 
-@collection
-class Field {
-  Id id = Isar.autoIncrement;
-
-  String? name;
-
-  double? area;
-  double? perimeter;
-
-  DateTime? created;
-
-  List<EmbeddedGeoPoint>? points;
+// Tables
+class Fields extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text().nullable()();
+  RealColumn get area => real().nullable()();
+  RealColumn get perimeter => real().nullable()();
+  DateTimeColumn get created => dateTime().nullable()();
+  TextColumn get pointsJson => text().nullable()(); // Store as JSON
 }
 
-@embedded
-class EmbeddedGeoPoint {
-  double? lat;
-  double? lng;
-  int? timestamp;
-
-  EmbeddedGeoPoint({this.lat, this.lng, this.timestamp});
+class Settings extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get equipmentName => text().nullable()();
+  RealColumn get equipmentWidth => real().nullable()();
+  RealColumn get equipmentSpeed => real().nullable()();
+  TextColumn get equipmentType => text().nullable()();
 }
 
-@collection
-class Settings {
-  Id id = Isar.autoIncrement;
+@DriftDatabase(tables: [Fields, Settings])
+class AppDatabase extends _$AppDatabase {
+  AppDatabase() : super(_openConnection());
 
-  String? equipmentName;
-  double? equipmentWidth;
-  double? equipmentSpeed;
-  String? equipmentType;
+  @override
+  int get schemaVersion => 1;
 }
 
+LazyDatabase _openConnection() {
+  return LazyDatabase(() async {
+    final dbFolder = await getApplicationDocumentsDirectory();
+    final file = File(p.join(dbFolder.path, 'terratrack.db'));
+    return NativeDatabase(file);
+  });
+}
+
+// Database Service
 class DatabaseService {
-  late Future<Isar> db;
+  late AppDatabase db;
 
   DatabaseService() {
-    db = _initDB();
-  }
-
-  Future<Isar> _initDB() async {
-    final dir = await getApplicationDocumentsDirectory();
-    return await Isar.open(
-      [FieldSchema, SettingsSchema],
-      directory: dir.path,
-    );
+    db = AppDatabase();
   }
 
   Future<void> saveField(String name, List<GeoPoint> points, double area, double perimeter) async {
-    final isar = await db;
-    final field = Field()
-      ..name = name
-      ..area = area
-      ..perimeter = perimeter
-      ..created = DateTime.now()
-      ..points = points.map((p) => EmbeddedGeoPoint(lat: p.lat, lng: p.lng, timestamp: p.timestamp)).toList();
-
-    await isar.writeTxn(() async {
-      await isar.fields.put(field);
-    });
+    // Convert points to JSON
+    final pointsJson = points.map((p) => '${p.lat},${p.lng},${p.timestamp}').join(';');
+    
+    await db.into(db.fields).insert(
+      FieldsCompanion.insert(
+        name: Value(name),
+        area: Value(area),
+        perimeter: Value(perimeter),
+        created: Value(DateTime.now()),
+        pointsJson: Value(pointsJson),
+      ),
+    );
   }
 
   Future<List<Field>> getFields() async {
-    final isar = await db;
-    return await isar.fields.where().findAll();
+    return await db.select(db.fields).get();
   }
 
   Future<void> saveSettings(String name, double width, double speed, String type) async {
-    final isar = await db;
-    final settings = Settings()
-      ..equipmentName = name
-      ..equipmentWidth = width
-      ..equipmentSpeed = speed
-      ..equipmentType = type;
-
-    await isar.writeTxn(() async {
-      // We only want one settings object, so clear others or update first
-      await isar.settings.clear();
-      await isar.settings.put(settings);
-    });
+    // Delete existing settings first
+    await db.delete(db.settings).go();
+    
+    await db.into(db.settings).insert(
+      SettingsCompanion.insert(
+        equipmentName: Value(name),
+        equipmentWidth: Value(width),
+        equipmentSpeed: Value(speed),
+        equipmentType: Value(type),
+      ),
+    );
   }
 
-  Future<Settings?> getSettings() async {
-    final isar = await db;
-    return await isar.settings.where().findFirst();
+  Future<Setting?> getSettings() async {
+    final results = await db.select(db.settings).get();
+    return results.isEmpty ? null : results.first;
   }
 }
