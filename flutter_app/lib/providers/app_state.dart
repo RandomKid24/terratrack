@@ -80,6 +80,27 @@ class PlanController extends _$PlanController {
 }
 
 @riverpod
+class CoverageProgressController extends _$CoverageProgressController {
+  @override
+  double build() => 0.0; // 0.0 to 1.0
+
+  void updateProgress(double progress) => state = progress;
+  void reset() => state = 0.0;
+}
+
+@riverpod
+class RunPathController extends _$RunPathController {
+  @override
+  List<GeoPoint> build() => [];
+
+  void addPoint(GeoPoint point) {
+    state = [...state, point];
+  }
+  
+  void clear() => state = [];
+}
+
+@riverpod
 Stream<Position> gpsStream(GpsStreamRef ref) async* {
   bool serviceEnabled;
   LocationPermission permission;
@@ -102,6 +123,12 @@ Stream<Position> gpsStream(GpsStreamRef ref) async* {
     throw Exception(
       'Location permissions are permanently denied, we cannot request permissions.');
   } 
+
+  // Try to get the last known position first for immediate feedback
+  final lastKnown = await Geolocator.getLastKnownPosition();
+  if (lastKnown != null) {
+    yield lastKnown;
+  }
 
   // When we reach here, permissions are granted and we can
   // continue accessing the position of the device.

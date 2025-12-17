@@ -22,6 +22,40 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     final plan = ref.watch(planControllerProvider);
     final equipment = ref.watch(equipmentControllerProvider);
     final isSurveying = ref.watch(isSurveyingProvider);
+    final runPath = ref.watch(runPathControllerProvider);
+    final progress = ref.watch(coverageProgressControllerProvider);
+
+    // Listen to GPS updates for RUN mode logic
+    ref.listen(gpsStreamProvider, (previous, next) {
+      next.whenData((pos) {
+        if (mode == AppMode.RUN && plan != null) {
+           final point = GeoPoint(
+             lat: pos.latitude,
+             lng: pos.longitude,
+             timestamp: pos.timestamp?.millisecondsSinceEpoch ?? DateTime.now().millisecondsSinceEpoch,
+           );
+           
+           // Add to run path
+           ref.read(runPathControllerProvider.notifier).addPoint(point);
+           
+           // Calculate progress (simplified: distance traveled / total plan distance)
+           // In a real app, we'd project point to nearest segment and track segment completion.
+           if (runPath.isNotEmpty) {
+             final last = runPath.last;
+             final dist = GeoUtils.distanceMeters(last, point);
+             // Simple accumulation logic could be here, but for now let's just use runPath length
+             
+             double traveled = 0;
+             for(int i=0; i<runPath.length-1; i++) {
+               traveled += GeoUtils.distanceMeters(runPath[i], runPath[i+1]);
+             }
+             // Cap at 100%
+             final p = (traveled / plan.totalDistance).clamp(0.0, 1.0);
+             ref.read(coverageProgressControllerProvider.notifier).updateProgress(p);
+           }
+        }
+      });
+    });
 
     return Scaffold(
       body: Stack(
@@ -37,9 +71,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                       lng: pos.longitude,
                       timestamp: pos.timestamp?.millisecondsSinceEpoch ?? DateTime.now().millisecondsSinceEpoch,
                     ),
+                    accuracy: pos.accuracy,
                     geoPoints: geoPoints,
                     field: field,
                     plan: plan,
+                    runPath: runPath,
                     mode: mode,
                   ),
                 );
@@ -76,9 +112,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                         const SizedBox(height: 24),
                         ElevatedButton(
                           onPressed: () async {
-                            // Retry by invalidating the provider
                             ref.invalidate(gpsStreamProvider);
-                            // Also try to request permission again
                             await Geolocator.requestPermission();
                           },
                           child: const Text('Retry Permission / GPS'),
@@ -114,12 +148,29 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                           child: const Icon(Icons.agriculture, color: Colors.green),
                         ),
                         const SizedBox(width: 8),
-                        Text(
-                          _getTitle(mode),
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _getTitle(mode),
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            // Show Accuracy
+                            gpsAsync.when(
+                              data: (pos) => Text(
+                                'GPS Accuracy: ${pos.accuracy.toStringAsFixed(1)}m',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: pos.accuracy < 10 ? Colors.green : Colors.orange,
+                                ),
+                              ),
+                              loading: () => const SizedBox.shrink(),
+                              error: (_,__) => const SizedBox.shrink(),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -152,7 +203,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 ],
               ),
               child: SafeArea(
-                child: _buildControls(mode, geoPoints, field, equipment, isSurveying),
+                child: _buildControls(mode, geoPoints, field, equipment, isSurveying, progress, gpsAsync),
               ),
             ),
           ),
@@ -170,7 +221,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     }
   }
 
-  Widget _buildControls(AppMode mode, List<GeoPoint> points, FieldPolygon? field, Equipment equipment, bool isSurveying) {
+  Widget _buildControls(AppMode mode, List<GeoPoint> points, FieldPolygon? field, Equipment equipment, bool isSurveying, double progress, AsyncValue<Position> gpsAsync) {
     switch (mode) {
       case AppMode.CAPTURE:
         return Column(
@@ -199,7 +250,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        final pos = ref.read(gpsStreamProvider).value;
+                        final pos = gpsAsync.value;
                         if (pos != null) {
                           ref.read(geoPointsControllerProvider.notifier).addPoint(
                             GeoPoint(
@@ -213,7 +264,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                       icon: const Icon(Icons.add_circle_outline),
                       label: const Text('Add Corner'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
+                        backgroundColor: (gpsAsync.value?.accuracy ?? 100) < 15 ? Colors.green : Colors.orange,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
@@ -343,6 +394,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
              ElevatedButton.icon(
                onPressed: () {
                  ref.read(appModeControllerProvider.notifier).setMode(AppMode.RUN);
+                 ref.read(runPathControllerProvider.notifier).clear();
+                 ref.read(coverageProgressControllerProvider.notifier).reset();
                },
                icon: const Icon(Icons.play_arrow),
                label: const Text('Start Run'),
@@ -356,7 +409,41 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           ],
         );
       case AppMode.RUN:
-         return const Center(child: Text("Running..."));
+         return Column(
+           mainAxisSize: MainAxisSize.min,
+           children: [
+             LinearProgressIndicator(
+               value: progress,
+               minHeight: 10,
+               backgroundColor: Colors.grey.shade200,
+               color: Colors.green,
+               borderRadius: BorderRadius.circular(5),
+             ),
+             const SizedBox(height: 12),
+             Row(
+               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+               children: [
+                 Text('${(progress * 100).toStringAsFixed(1)}% Covered', 
+                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                 Text('Running...', style: TextStyle(color: Colors.grey.shade600)),
+               ],
+             ),
+             const SizedBox(height: 16),
+             ElevatedButton.icon(
+               onPressed: () {
+                 ref.read(appModeControllerProvider.notifier).setMode(AppMode.PLAN);
+               },
+               icon: const Icon(Icons.stop),
+               label: const Text('Stop Run'),
+               style: ElevatedButton.styleFrom(
+                 backgroundColor: Colors.red,
+                 foregroundColor: Colors.white,
+                 padding: const EdgeInsets.symmetric(vertical: 16),
+                 minimumSize: const Size(double.infinity, 50),
+               ),
+             ),
+           ],
+         );
     }
   }
 
@@ -444,16 +531,20 @@ class _StatCard extends StatelessWidget {
 
 class MapPainter extends CustomPainter {
   final GeoPoint currentPos;
+  final double accuracy;
   final List<GeoPoint> geoPoints;
   final FieldPolygon? field;
   final CoveragePlan? plan;
+  final List<GeoPoint> runPath;
   final AppMode mode;
 
   MapPainter({
     required this.currentPos,
+    this.accuracy = 0,
     required this.geoPoints,
     this.field,
     this.plan,
+    this.runPath = const [],
     required this.mode,
   });
 
@@ -494,6 +585,13 @@ class MapPainter extends CustomPainter {
     
     final pointsToCheck = [...projected];
     if (mode == AppMode.CAPTURE) pointsToCheck.add(currentProj);
+    
+    // Also include run path in bounds if running
+    List<Point2D> runPathProj = [];
+    if (runPath.isNotEmpty) {
+      runPathProj = runPath.map((p) => GeoUtils.geoToCartesian(p, origin)).toList();
+      pointsToCheck.addAll(runPathProj);
+    }
     
     if (pointsToCheck.isEmpty) {
        // Just center current pos
@@ -549,13 +647,29 @@ class MapPainter extends CustomPainter {
       paint.strokeWidth = 3;
       canvas.drawPath(path, paint);
       
-      // Draw corners
+      // Draw corners and labels
       paint.style = PaintingStyle.fill;
       paint.color = Colors.white;
-      for (var p in projected) {
+      
+      for (int i = 0; i < projected.length; i++) {
+        final p = projected[i];
         final s = toScreen(p);
+        
+        // Draw point
         canvas.drawCircle(s, 5, paint);
         canvas.drawCircle(s, 5, Paint()..color = Colors.green ..style = PaintingStyle.stroke ..strokeWidth = 2);
+        
+        // Draw Label (P1, P2, etc.)
+        final textSpan = TextSpan(
+          text: 'P${i + 1}',
+          style: const TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold),
+        );
+        final textPainter = TextPainter(
+          text: textSpan,
+          textDirection: TextDirection.ltr,
+        );
+        textPainter.layout(minWidth: 0, maxWidth: size.width);
+        textPainter.paint(canvas, Offset(s.dx + 8, s.dy - 8));
       }
     }
     
@@ -578,8 +692,38 @@ class MapPainter extends CustomPainter {
       }
     }
     
+    // Draw Run Path (Trail)
+    if (runPathProj.isNotEmpty) {
+      paint.color = Colors.green.withOpacity(0.5);
+      paint.style = PaintingStyle.stroke;
+      paint.strokeWidth = 10; // Width of equipment roughly
+      paint.strokeCap = StrokeCap.round;
+      
+      final path = Path();
+      final start = toScreen(runPathProj[0]);
+      path.moveTo(start.dx, start.dy);
+      for(int i=1; i<runPathProj.length; i++) {
+        final p = toScreen(runPathProj[i]);
+        path.lineTo(p.dx, p.dy);
+      }
+      canvas.drawPath(path, paint);
+    }
+    
     // Draw Current Position
     final sPos = toScreen(currentProj);
+    
+    // Draw Accuracy Circle (if available)
+    if (accuracy > 0) {
+      final accuracyRadius = accuracy * scale; // Convert meters to pixels
+      paint.style = PaintingStyle.fill;
+      paint.color = Colors.blue.withOpacity(0.1);
+      canvas.drawCircle(sPos, accuracyRadius, paint);
+      
+      paint.style = PaintingStyle.stroke;
+      paint.color = Colors.blue.withOpacity(0.3);
+      paint.strokeWidth = 1;
+      canvas.drawCircle(sPos, accuracyRadius, paint);
+    }
     
     // Pulse effect (simple circle for now)
     paint.style = PaintingStyle.fill;
@@ -607,6 +751,10 @@ class MapPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant MapPainter oldDelegate) {
-    return true; // Repaint on any change for now
+    return oldDelegate.currentPos != currentPos || 
+           oldDelegate.geoPoints != geoPoints ||
+           oldDelegate.mode != mode ||
+           oldDelegate.runPath.length != runPath.length ||
+           oldDelegate.accuracy != accuracy;
   }
 }

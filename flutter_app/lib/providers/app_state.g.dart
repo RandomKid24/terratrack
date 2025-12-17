@@ -117,5 +117,38 @@ final planControllerProvider =
 );
 
 typedef _$PlanController = AutoDisposeNotifier<CoveragePlan?>;
+String _$coverageProgressControllerHash() =>
+    r'c8042f1760e096ca8129a6bbad280d7d0449e352';
+
+/// See also [CoverageProgressController].
+@ProviderFor(CoverageProgressController)
+final coverageProgressControllerProvider =
+    AutoDisposeNotifierProvider<CoverageProgressController, double>.internal(
+  CoverageProgressController.new,
+  name: r'coverageProgressControllerProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$coverageProgressControllerHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef _$CoverageProgressController = AutoDisposeNotifier<double>;
+String _$runPathControllerHash() => r'c887d22dd32422307509e55d2da1505f060d82f2';
+
+/// See also [RunPathController].
+@ProviderFor(RunPathController)
+final runPathControllerProvider =
+    AutoDisposeNotifierProvider<RunPathController, List<GeoPoint>>.internal(
+  RunPathController.new,
+  name: r'runPathControllerProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$runPathControllerHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef _$RunPathController = AutoDisposeNotifier<List<GeoPoint>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
